@@ -1,7 +1,6 @@
 "use client";
 
 import { supabase } from "@/lib/supabaseclient";
-import { Form } from "@heroui/form";
 import { Input } from "@heroui/input";
 import { Button } from "@heroui/button";
 import { Card, CardBody, CardHeader } from "@heroui/card";
@@ -25,7 +24,7 @@ const Register = () => {
   const handleRegister = async (form: registerInputValid) => {
     const { email, password } = form;
 
-    const {data ,  error } = await supabase.auth.signUp({ email, password });
+    const { error } = await supabase.auth.signUp({ email, password });
 
     if (error) setError(error.message);
     else router.push("/login");
