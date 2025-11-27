@@ -9,10 +9,12 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { registerInputValid, registerSchema } from "@/lib/validators/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
+import Swal from "sweetalert2";
+import { Link } from "@heroui/link";
 const Register = () => {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
-
+  const [showPassword, setShowPassword] = useState<boolean>(false);
   const {
     register,
     handleSubmit,
@@ -23,13 +25,34 @@ const Register = () => {
 
   const handleRegister = async (form: registerInputValid) => {
     const { email, password } = form;
-
-    const { error } = await supabase.auth.signUp({ email, password });
+    Swal.fire({
+      title: "Please Verify Your Email",
+      text: "We Sent a Verification Url To Your Email",
+      confirmButtonText:'OK',
+      theme : 'dark',
+      icon: "warning",
+      showClass: {
+        popup: `
+      animate__animated
+      animate__fadeInUp
+      animate__faster
+    `,
+      },
+      hideClass: {
+        popup: `
+      animate__animated
+      animate__fadeOutDown
+      animate__faster
+    `,
+      },
+    });
+    const { error } = await supabase.auth.signUp({ email, password , options : {
+      emailRedirectTo : 'http://localhost:3000/login'
+    }});
 
     if (error) setError(error.message);
     else router.push("/login");
   };
-
   return (
     <div
       className="
@@ -84,7 +107,7 @@ const Register = () => {
             </div>
             <div className="justify-end">
               <Input
-                type="password"
+                type={showPassword ? "string" : "password"}
                 placeholder="Enter your password: "
                 variant="flat"
                 classNames={{
@@ -95,15 +118,15 @@ const Register = () => {
                 }}
                 {...register("password")}
               />
-              {
-                errors?.password && (
-                  <p className="text-[#c72d2d] ml-2 mt-2 text-[16px]">{errors?.password?.message}</p>
-                )
-              }
+              {errors?.password && (
+                <p className="text-[#c72d2d] ml-2 mt-2 text-[16px]">
+                  {errors?.password?.message}
+                </p>
+              )}
             </div>
-              <div className="justify-end">
+            <div className="justify-end">
               <Input
-                type="password"
+                type={showPassword ? "string" : "password"}
                 placeholder="Confirm Your Password: "
                 variant="flat"
                 classNames={{
@@ -114,17 +137,31 @@ const Register = () => {
                 }}
                 {...register("confirmPass")}
               />
-              {
-                errors?.confirmPass && (
-                  <p className="text-[#c72d2d] ml-2 mt-2 text-[16px]">{errors?.confirmPass?.message}</p>
-                )
-              }
+              {errors?.confirmPass && (
+                <p className="text-[#c72d2d] ml-2 mt-2 text-[16px]">
+                  {errors?.confirmPass?.message}
+                </p>
+              )}
             </div>
-              {
-                error && (
-                  <p>{error}</p>
-                )
-              }
+            {error && (
+              <p className="text-[#c72d2d] ml-2 mt-2 text-[16px]">{error}</p>
+            )}{" "}
+            <Button
+              type="button"
+              className="
+              w-full py-3 font-semibold
+              bg-[#146527] text-white
+              rounded-xl
+              shadow-[0_0_15px_rgba(37,99,235,0.5)]
+              hover:shadow-[0_0_35px_rgba(37,99,235,0.9)]
+              hover:bg-[#308e1d]
+              transition-all duration-300
+              active:scale-95
+            "
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? "Hide Password" : "Show Password"}
+            </Button>
             <Button
               type="submit"
               className="
@@ -140,15 +177,14 @@ const Register = () => {
             >
               Register
             </Button>
-
             <p className="text-center text-sm text-neutral-400">
               Already have an account?
-              <span
-                className="text-blue-400 ml-1 cursor-pointer hover:text-blue-300 underline"
+              <Link href="/login"
+                className="text-blue-400 ml-1 cursor-pointer hover:text-blue-300"
                 onClick={() => router.push("/login")}
               >
                 Login
-              </span>
+              </Link>
             </p>
           </form>
         </CardBody>

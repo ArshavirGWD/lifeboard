@@ -1,21 +1,37 @@
-'use client'
+"use client";
 import { supabase } from "@/lib/supabaseclient";
-import { loginInputValid } from "@/lib/validators/auth";
+import { loginInputValid, loginSchema } from "@/lib/validators/auth";
 import { Button } from "@heroui/button";
 import { Card, CardBody, CardHeader } from "@heroui/card";
-import { Form } from "@heroui/form";
 import { Input } from "@heroui/input";
+import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
 
 const Login = () => {
-  const router = useRouter()
+  const [error , setError] = useState<string | null>(null)
+  const router = useRouter();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(loginSchema),
+  });
   const handleLogin = async (form: loginInputValid) => {
-    const {email ,password} = form
-    const {data , error} = await supabase.auth.signInWithPassword({email , password})
-    if(error){}
-  }
+    const { email, password } = form;
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+    if (error) {
+      setError(error.message)
+    }else {
+      router.push('/dashboard')
+    }
+  };
   return (
     <div
       className="
@@ -42,11 +58,13 @@ const Login = () => {
         </CardHeader>
 
         <CardBody>
-          <Form className="space-y-6 mt-4">
-            <Input
+          <form onSubmit={handleSubmit(handleLogin)} className="space-y-6 mt-4">
+           <div className="justify-end">
+             <Input
               type="email"
               placeholder="Enter Your Email: "
               variant="flat"
+              {...register('email')}
               classNames={{
                 inputWrapper:
                   "bg-white/10 p-2 rounded-[8px] border border-white/10 hover:border-blue-500/40 focus-within:border-blue-500/70 backdrop-blur-xl",
@@ -54,11 +72,19 @@ const Login = () => {
                 label: "text-neutral-300",
               }}
             />
+            {
+              errors?.email && ( 
+                <p className="text-[#c72d2d] ml-2 mt-2 text-[16px]">{errors?.email?.message}</p>
+              )
+            }
+           </div>
 
-            <Input
+           <div className="justify-end">
+             <Input
               type="password"
               placeholder="Enter your password: "
               variant="flat"
+              {...register('password')}
               classNames={{
                 inputWrapper:
                   "bg-white/10 rounded-[8px] border p-2 border-white/10 hover:border-blue-500/40 focus-within:border-blue-500/70 backdrop-blur-xl",
@@ -66,7 +92,17 @@ const Login = () => {
                 label: "text-neutral-300",
               }}
             />
-
+            {
+              errors?.password && (
+                <p className="text-[#c72d2d] ml-2 mt-2 text-[16px]">{errors?.password?.message}</p>
+              )
+            }
+           </div>
+            {
+              error && (
+                <p className="text-[#c72d2d] ml-2 mt-2 text-[16px]">{error}</p>
+              )
+            }
             <Button
               type="submit"
               className="
@@ -79,7 +115,6 @@ const Login = () => {
               transition-all duration-300
               active:scale-95
             "
-            onClick={() => router.push('/dashboard')}
             >
               login
             </Button>
@@ -93,7 +128,7 @@ const Login = () => {
                 Create One
               </Link>
             </p>
-          </Form>
+          </form>
         </CardBody>
       </Card>
     </div>
