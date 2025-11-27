@@ -1,7 +1,8 @@
 'use client'
 import { supabase } from "@/lib/supabaseclient";
+import { Form } from "@heroui/form";
 import { Input } from "@heroui/input";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 
 const Register = () => {
@@ -16,9 +17,9 @@ const Register = () => {
     else router.push('/login');
   };
   return <div className="dark:bg-[#111111]">
-    <form onSubmit={handleRegister}>
+    <Form className="max-w-[700px]"  onSubmit={handleRegister}>
         <Input type="email" placeholder="Enter Your Email : "/>
-    </form>
+    </Form>
   </div>;
 };
 
